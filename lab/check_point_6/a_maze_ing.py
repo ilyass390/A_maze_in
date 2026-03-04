@@ -175,51 +175,30 @@ class A_Maze_Ing:
                 maze[eny, enx] = 42
             return path, path_way
         
-
-        def validate_coordinates(self, coord_x: int, coord_y: int, width: int, height: int, coord_name: str) -> None:
-            buffer = 2
-            
-            if coord_x < -buffer or coord_x > width + buffer:
-                raise ValueError(
-                    f" Invalid {coord_name} x-coordinate: {coord_x}\n"
-                )
-            
-            if coord_y < -buffer or coord_y > height + buffer:
-                raise ValueError(
-                    f" Invalid {coord_name} y-coordinate: {coord_y}\n"
-                )
-
-        def normalize_to_valid_cell(self, coord_x: int, coord_y: int, width: int, height: int) -> tuple:
-            
-            x = max(1, min(coord_x, width - 2))
-            y = max(1, min(coord_y, height - 2))
-            
-            if x % 2 == 0:
-                if x == width - 2:
-                    x = x - 1
-                else:
-                    x = x + 1
-            
-            if y % 2 == 0:
-                if y == height - 2:
-                    y = y - 1
-                else:
-                    y = y + 1
-            
-            return x, y
-
         def generate_maze(self, height: int, width: int, entry_point: tuple, exit_point: tuple) -> n.ndarray:
+    
             maze = self.grid_creator(height, width)
             
-            entry_x, entry_y = entry_point
-            exit_x, exit_y = exit_point
+            entry_x , entry_y = entry_point
+            exit_x , exit_y = exit_point
             
-            self.validate_coordinates(entry_x, entry_y, width, height, "ENTRY")
-            self.validate_coordinates(exit_x, exit_y, width, height, "EXIT")
+            if entry_x == 0 or entry_y == 0 or entry_x >= width - 1 or entry_y >= height - 1:
+                raise ValueError(f"Invalid Entry ({entry_x}, {entry_y}): entry cannot be on the maze boundary.")
+            if exit_x == 0 or exit_y == 0 or exit_x >= width - 1 or exit_y >= height - 1:
+                raise ValueError(f"Invalid Exit ({exit_x}, {exit_y}): exit cannot be on the maze boundary.")
+            
+            exit_x = exit_x if exit_x % 2 != 0 else exit_x + 1
+            exit_y = exit_y if exit_y % 2 != 0 else exit_y + 1
 
-            entry_x, entry_y = self.normalize_to_valid_cell(entry_x, entry_y, width, height)
-            exit_x, exit_y = self.normalize_to_valid_cell(exit_x, exit_y, width, height)
+
+            entry_x = entry_x if entry_x % 2 != 0 else entry_x + 1
+            entry_y = entry_y if entry_y % 2 != 0 else entry_y + 1
             
+            entry_x = min(entry_x, width - 2)
+            entry_y = min(entry_y, height - 2)
+            
+            exit_x = min(exit_x, width - 2)
+            exit_y = min(exit_y, height - 2)
             valid_point = self.shape_patter_42(maze)
             if valid_point:
                 pattern = self.pattern_42()
@@ -228,12 +207,11 @@ class A_Maze_Ing:
                     valid_cell_x = (x + pattern_x) * 2 + 1
                     valid_cell_y = (y + pattern_y) * 2 + 1
                     maze[valid_cell_y, valid_cell_x] = 0xf
-            
             path_way = []
             self.recursive_backtracker(maze, entry_x, entry_y, height, width, exit_x, exit_y, path_way)
-            
             maze[entry_y, entry_x] = 0xE
             maze[exit_y, exit_x] = 0xE2
+            
             
             return maze, path_way
         
@@ -285,7 +263,7 @@ class A_Maze_Ing:
     def maze_printer(maze):
         
         reset = "\x1b[0m"
-        wall  = "\x1b[40m░ "           
+        wall  = "\x1b[40m  "           
         path  = "\x1b[48;5;15m  "    
         sol   = "\x1b[48;5;99m░░"
         start = "\x1b[48;5;129m  "    

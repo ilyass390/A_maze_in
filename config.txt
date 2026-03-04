@@ -1,23 +1,24 @@
-WIDTH= 40
+WIDTH=15
 
-HEIGHT= 40
+HEIGHT=15
 
-EXIT=30,30
-
-
-# seed must be <= 4294967295 and >= 0
+EXIT=0,0
 
 
-SEED=
+# seed must be <= 4294967295 and >= 0, nevermind just for numpy
 
 
-ENTRY=9, 9
 
 
-FLAWED=20
+SEED=None
 
 
-OUTPUT_FILE=output.txt
+ENTRY=0, 9
 
 
-PERFECT=True
+
+
+OUTPUT_FILE=alo
+
+
+PERFECT=true
