@@ -15,7 +15,6 @@ def main():
     output_file = parsed_config["OUTPUT_FILE"]
     perfect = parsed_config["PERFECT"]
     seed = parsed_config["SEED"]
-
     while True:
         if seed:
             random.seed(seed)
