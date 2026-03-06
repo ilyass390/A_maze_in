@@ -176,9 +176,9 @@ class MazeGenerator:
         """Find the shortest path from entry to exit using BFS.
         """
         directions: Dict[int, Tuple[int, int, str]] = {
+            2: (0, 1, 'S'),
             0: (0, -1, 'N'),
             1: (1, 0, 'E'),
-            2: (0, 1, 'S'),
             3: (-1, 0, 'W'),
         }
         enx: int
@@ -197,10 +197,10 @@ class MazeGenerator:
             y: int
             path: str
             x, y, path = queue.pop(0)
+            if (x, y) == (exx, exy):
+                return path
 
             for direction, (dx, dy, compass) in directions.items():
-                if (x, y) == (exx, exy):
-                    return path + compass
                 if not bool(maze[y, x] & (0x1 << direction)):
                     nx: int = x + dx
                     ny: int = y + dy
