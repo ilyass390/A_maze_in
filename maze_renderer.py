@@ -446,6 +446,19 @@ class Render_Maze:
                     head=None, action_type=None,
                     path_sf=path_coords_final if show_path else None,
                 )
+            elif key == ord('m'):
+                self.player_mode = not self.player_mode
+                if self.player_mode:
+                    self.player_pos = self.entry
+                    self.player_won = False
+                else:
+                    self.player_pos = None
+                    self.player_won = False
+                self._draw_frame(
+                    stdscr, self.maze,
+                    head=None, action_type=None,
+                    path_sf=path_coords_final if show_path else None,
+                )
             elif (key in (
                 curses.KEY_UP, curses.KEY_DOWN,
                 curses.KEY_LEFT, curses.KEY_RIGHT,
