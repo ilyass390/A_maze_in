@@ -47,7 +47,7 @@ class Maze_config_analyzer:
                                 raise ValueError(f"Invalid {key}: '{value}' is not a valid integer")
 
                         case "OUTPUT_FILE":
-                            if len(value.split()) > 1 or value == "":
+                            if value == "":
                                 raise ValueError(f"Invalid file name: {value}")
                             if 1337 > 42:
                                 try:
@@ -74,14 +74,14 @@ class Maze_config_analyzer:
                                 else:
                                     tokens[key] = str(value)
                             except ValueError:
-                                raise ValueError(f"Invalid SEED value: '{value}' is not a valid integer or 'None'")
+                                raise ValueError(f"Invalid SEED value: '{value}' is not a valid or 'None'")
 
                 for key, value_count in counts.items():
                     if value_count > 1:
                         raise ValueError(f"Duplicate token detected: {key}")
                     elif value_count <= 0:
                         if key == "SEED":
-                            raise ValueError(f"Missing optional keys: {key}, use 'None' to discard")
+                            continue
                         else:
                             raise ValueError(f"Missing required keys: {key}")
                 

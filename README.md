@@ -89,7 +89,6 @@ WIDTH=15
 HEIGHT=15
 EXIT=0,0
 ENTRY=0,9
-seed=none
 OUTPUT_FILE=maze.txt
 PERFECT=true
 ```
@@ -100,7 +99,6 @@ PERFECT=true
 | `HEIGHT`      | Integer           | Number of rows in the maze.                                                  |
 | `ENTRY`       | `row,col`         | Coordinates of the maze entry point.                                         |
 | `EXIT`        | `row,col`         | Coordinates of the maze exit point.                                          |
-| `SEED`        | Integer or `none` | Random seed for reproducible maze generation. Use `none` for random.         |
 | `OUTPUT_FILE` | String            | Path to the file where the maze will be saved.                               |
 | `PERFECT`     | Boolean           | If `true`, generates a perfect maze (no loops, one unique path).             |
 
