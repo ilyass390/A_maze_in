@@ -2,7 +2,7 @@ import numpy as n
 import random
 from typing import Any, List, Dict, Union, Optional
 from config_validator import Maze_config_analyzer as ConfigAnalyzer
-from backtracker import MazeGenerator as MazeGen
+from MazeGenerator_engine import MazeGenerator as MazeGen
 from maze_renderer import Render_Maze
 
 
