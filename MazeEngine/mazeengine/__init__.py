@@ -1,1 +1,0 @@
-from .mazegenerator_engine import MazeGenerator

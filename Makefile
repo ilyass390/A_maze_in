@@ -1,8 +1,15 @@
-PURPLE := \033[1;35m
-RESET  := \033[0m
+CYAN    := \033[36m
+GREEN   := \033[32m
+YELLOW  := \033[33m
+BOLD    := \033[1m
+RESET   := \033[0m
 
 define log
-	@printf "$(PURPLE)%s$(RESET)\n" "$1"
+	@echo ""
+	@echo "$(CYAN)$(BOLD)╔══════════════════════════════════════╗$(RESET)"
+	@echo "$(CYAN)$(BOLD)║  $(GREEN)▶ $(YELLOW)$(1)$(CYAN)$(BOLD)$(RESET)"
+	@echo "$(CYAN)$(BOLD)╚══════════════════════════════════════╝$(RESET)"
+	@echo ""
 endef
 
 .PHONY: install run debug clean lint
