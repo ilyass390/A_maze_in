@@ -1,13 +1,16 @@
 [tool.poetry]
 name = "mazeengine"
-version = "0.1.0"
+version = "0.1.3"
 description = "A maze generator stand-alone module that will generate a maze based on config"
 authors = ["aymel-ha", "iamessag"]
 license = "MIT"
-package-mode = true
+readme = "README.md"
+packages = [
+    { include = "mazeengine" }
+]
 
 [tool.poetry.dependencies]
-python = ">=3.10.12"
+python = ">=3.10"
 numpy = ">=1.26.4"
 
 [build-system]
