@@ -219,8 +219,8 @@ class MazeGenerator:
         for y in range(self.height - 2):
             for x in range(self.width - 2):
                 open_check: bool = True
-                for y1 in range(y, y + 3):
-                    for x1 in range(x, x + 3):
+                for y1 in range(y, y + 2):
+                    for x1 in range(x, x + 2):
                         if maze[y1, x1] & (1 << 1) or maze[y1, x1] & (1 << 2):
                             open_check = False
                             break

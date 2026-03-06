@@ -1,7 +1,7 @@
-WIDTH=15
-HEIGHT=15
+WIDTH=8
+HEIGHT=7
 ExIT=0,2
-ENTRY=0, +9
+ENTRY=0, +3
 OUtPUT_FILE=output.txt
 PERFECT=true
-# seed = hh
+seed = hh
