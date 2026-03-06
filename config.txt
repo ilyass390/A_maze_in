@@ -1,18 +1,7 @@
 WIDTH=15
-
 HEIGHT=15
-
-EXIT=0,0
-
-
-
-
-ENTRY=0, 9
-
-
-
-
-OUTPUT_FILE=maze   .txt
-
-
+ExIT=0,2
+ENTRY=0, +9
+OUtPUT_FILE=maze   .txt
 PERFECT=true
+# seed=2

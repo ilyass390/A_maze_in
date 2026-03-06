@@ -32,17 +32,19 @@ class Maze_config_analyzer:
                     if "=" not in line:
                         raise ValueError('Invalid line format: missing "=" separator')
                     key, value = map(str.strip, line.split("=", 1))
+                    key = key.upper()
                     if key not in tokens or value == "":
                         raise ValueError('Invalid token or missing value')
 
                     counts[key] += 1
-
                     match key:
                         case "WIDTH" | "HEIGHT":
                             try:
                                 tokens[key] = int(value)
                                 if tokens[key] <= 0:
                                     raise ValueError(f"{key} must be positive")
+                                if tokens[key] > 50:
+                                    raise ValueError(f'{key} is out supported ranges (max is 50)')
                             except ValueError as e:
                                 raise ValueError(f"Invalid {key}: '{value}' is not a valid integer")
 
