@@ -17,7 +17,8 @@ class Render_Maze:
         self.maze: np.ndarray = maze
         self.entry: Tuple[int, int] = entry
         self.exit: Tuple[int, int] = exit_
-        self.path: Optional[str] = path
+        self._hidden_path = path
+        self.path: Optional[str] = None
         self.wall_color_index: int = 0
         self.wall_colors: List[int] = [
             curses.COLOR_WHITE,
@@ -207,11 +208,12 @@ class Render_Maze:
                     color = curses.color_pair(4)
                 elif (is_interior and self.player_pos
                         and (cell_x, cell_y) == self.player_pos
-                        and y % 2 != 0 and x % 3 != 0):
+                        and x % 3 != 0 and y % 2 != 0):
                     char = "◉"
                     color = curses.color_pair(5)
-                elif is_interior and (cell_x, cell_y) in path_set:
-                    char = "*" if x % 3 == 1 else " "
+                elif (is_interior and (cell_x, cell_y) in path_set
+                      and x % 3 != 0 and y % 2 != 0):
+                    char = "*" if (x - 1) % 3 == 1 else " "
                     color = curses.color_pair(7)
                 elif is_wall:
                     color = curses.color_pair(1)
@@ -289,6 +291,7 @@ class Render_Maze:
         height: int
         width: int
         height, width = self.maze.shape
+        show_path: bool = False
         anim_maze: np.ndarray = np.full((height, width), 0xF, dtype=np.uint8)
 
         delay: int = 50
@@ -364,40 +367,7 @@ class Render_Maze:
             self._draw_frame(stdscr, anim_maze, current_head, action['type'])
             curses.napms(delay)
 
-        if self.path and self.path != "No path found":
-            path_coords: List[Tuple[int, int]] = self._path_to_coords(
-                self.path
-                )
-            for i in range(len(path_coords)):
-                key = stdscr.getch()
-                if key == ord('q'):
-                    return False
-                elif key == ord('r'):
-                    return True
-                elif key == ord(' '):
-                    self._draw_frame(
-                        stdscr, anim_maze,
-                        head=None, action_type=None,
-                        path_sf=path_coords,
-                    )
-                    break
-                elif key == ord('d'):
-                    self.disco_mode = not self.disco_mode
-                if self.disco_mode:
-                    self._disco_tick()
-                self._draw_frame(
-                    stdscr, anim_maze,
-                    head=None, action_type=None,
-                    path_sf=path_coords[:i + 1],
-                )
-                curses.napms(30)
-
-        show_path: bool = True
-        path_coords_final: Optional[List[Tuple[int, int]]] = (
-            self._path_to_coords(self.path)
-            if self.path and self.path != "No path found"
-            else None
-        )
+        path_coords_final: Optional[List[Tuple[int, int]]] = None
 
         self._draw_frame(
             stdscr, self.maze,
@@ -414,12 +384,28 @@ class Render_Maze:
             elif key == ord('r'):
                 return True
             elif key == ord('p'):
-                show_path = not show_path
-                self._draw_frame(
-                    stdscr, self.maze,
-                    head=None, action_type=None,
-                    path_sf=path_coords_final if show_path else None,
-                )
+                if show_path:
+                    show_path = False
+                    self._draw_frame(stdscr, self.maze)
+                else:
+                    if self._hidden_path and self._hidden_path != "No path found":
+                        path_coords = self._path_to_coords(self._hidden_path)
+                        for i in range(len(path_coords)):
+                            if self.disco_mode:
+                                self._disco_tick()
+                            self._draw_frame(
+                                stdscr,
+                                self.maze,
+                                path_sf=path_coords[:i+1]
+                            )
+                            curses.napms(30)
+                        path_coords_final = path_coords
+                        show_path = True
+                        self._draw_frame(
+                                stdscr,
+                                self.maze,
+                                path_sf=path_coords_final
+                                )
             elif key == ord('c'):
                 self.disco_mode = False
                 self.wall_color_index = (
