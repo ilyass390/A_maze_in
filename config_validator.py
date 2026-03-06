@@ -10,10 +10,11 @@ class Maze_config_analyzer:
                 elif len(argv) < 2:
                     raise ValueError("No configuration file provided. Please provide the path to the configuration file.")
                 config_file: str = argv[1]
-                if not config_file.endswith(".txt"):
-                    raise ValueError(f"config file must be a text file")
-                with open(config_file, "r") as f:
-                    config_lines: list[str] = [line.strip() for line in f]
+                try:
+                    with open(config_file, "r") as f:
+                        config_lines: list[str] = [line.strip() for line in f]
+                except Exception as e:
+                    raise ValueError(f'occured during opening the file ({e.__class__.__name__})')
                 tokens: Dict[str, Union[bool, int]] = {
                     "WIDTH": 0,
                     "HEIGHT": 0,
@@ -49,12 +50,13 @@ class Maze_config_analyzer:
                                 raise ValueError(f"Invalid {key}: '{value}' is not a valid integer")
 
                         case "OUTPUT_FILE":
-                            if value == "":
+                            if value == "" or value is None:
                                 raise ValueError(f"Invalid file name: {value}")
                             if 1337 > 42:
                                 try:
                                     f =  open(value, "w")
-                                except Exception:
+                                    f.close()
+                                except Exception as e:
                                     raise ValueError(f"Cannot write to file: {value}")
                             tokens[key] = value
 

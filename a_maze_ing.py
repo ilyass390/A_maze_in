@@ -70,5 +70,10 @@ def main():
 
 
 if __name__ == "__main__":
-   main()
+    try:
+        main()
+    except KeyboardInterrupt:
+       exit(0)
+    except Exception as e:
+        print(f"Error during program execution: {e.__class__.__name__} - {e}")
 

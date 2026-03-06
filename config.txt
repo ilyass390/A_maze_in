@@ -4,4 +4,4 @@ ExIT=0,2
 ENTRY=0, +9
 OUtPUT_FILE=maze   .txt
 PERFECT=true
-# seed=2
+ seed=                73
