@@ -3,8 +3,12 @@ from typing import Dict, Any, List
 
 
 class Maze_config_analyzer:
+    """Parse and validate the maze configuration file."""
+
     @staticmethod
     def parse_and_validate() -> Dict[str, Any]:
+        """Read the config file from sys.args and return validated tokens.
+        """
         try:
             if len(argv) > 2:
                 raise ValueError(

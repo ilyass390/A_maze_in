@@ -7,7 +7,10 @@ from maze_renderer import Render_Maze
 
 
 class PyMaze:
+    """orchestrator for maze generation, solving, and display."""
+
     def __init__(self) -> None:
+        """Initialise with an empty imperfection-action list."""
         self.imp_actions: List = []
 
     def generate_maze(
@@ -20,6 +23,8 @@ class PyMaze:
         seed: Optional[int] = None,
         record: bool = False,
     ) -> Tuple[n.ndarray, str, List]:
+        """Generate a maze, solve it, and return everything needed to render.
+        """
         maze_generator: MazeGen = MazeGen(
             height,
             width,
@@ -55,6 +60,8 @@ class PyMaze:
         exit_: Tuple,
         path: str,
     ) -> None:
+        """Write the maze to a file in hexadecimal format.
+        """
         with open(output_file, "w") as f:
             for y in range(generated_maze.shape[0]):
                 row_cells: List[str] = []
@@ -74,6 +81,7 @@ class PyMaze:
 
 
 def main() -> None:
+    """Entry point: parse config, generate, render, and loop on regenerate."""
     parsed_config: dict = ConfigAnalyzer.parse_and_validate()
     entry: Tuple = tuple(parsed_config["ENTRY"].values())
     exit_: Tuple = tuple(parsed_config["EXIT"].values())

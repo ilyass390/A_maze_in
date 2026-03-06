@@ -4,6 +4,8 @@ import numpy as n
 
 
 class MazeGenerator:
+    """Generate mazes based on a config file using iterative backtracking."""
+
     def __init__(
         self,
         height: int,
@@ -14,6 +16,17 @@ class MazeGenerator:
         output_file: Optional[str],
         seed: Optional[int],
     ) -> None:
+        """Initialise the maze generator based on parsed
+        config file.
+
+            height: Number of rows in the maze.
+            width: Number of columns in the maze.
+            entry: (x, y) coordinates of the entry cell.
+            exit_: (x, y) coordinates of the exit cell.
+            perfect: If True, generate a perfect maze.
+            output_file: path for hexadecimal output.
+            seed: Optional random seed for reproducibility.
+        """
         self.width: int = width
         self.height: int = height
         self.entry: Tuple[int, int] = entry
@@ -25,6 +38,8 @@ class MazeGenerator:
         self.path: Optional[str] = None
 
     def pattern_42(self) -> Set[Tuple[int, int]]:
+        """Return scaled coordinates of the '42' pattern.
+        """
         base_pattern: Set[Tuple[int, int]] = {
             (0, 0), (0, 1), (0, 2), (1, 2), (2, 2), (2, 3), (2, 4),
             (4, 0), (5, 0), (6, 0), (6, 1), (4, 2), (5, 2), (6, 2), (4, 3),
@@ -46,11 +61,11 @@ class MazeGenerator:
         middle_x: int = (self.width - pattern_width) // 2
         middle_y: int = (self.height - pattern_height) // 2
         scaled_pattern: Set[Tuple[int, int]] = set()
-        for bx, by in base_pattern:
+        for px, py in base_pattern:
             for sx in range(scale):
                 for sy in range(scale):
-                    x: int = bx * scale + sx + middle_x
-                    y: int = by * scale + sy + middle_y
+                    x: int = px * scale + sx + middle_x
+                    y: int = py * scale + sy + middle_y
                     scaled_pattern.add((x, y))
         return scaled_pattern
 
@@ -58,6 +73,11 @@ class MazeGenerator:
         self,
         record: bool = False,
     ) -> Union[n.ndarray, Tuple[n.ndarray, List[Dict[str, Any]]]]:
+        """Generate a perfect maze via randomised iterative backtracking.
+
+        Uses a stack-based DFS that carves passages by removing walls
+        between near unvisited cells.
+        """
         direction_map: Dict[str, Tuple[int, int, int, int]] = {
             "North": (0, -1, 1, 4),
             "South": (0,  1, 4, 1),
@@ -153,6 +173,8 @@ class MazeGenerator:
         return maze
 
     def bfs(self, maze: n.ndarray) -> str:
+        """Find the shortest path from entry to exit using BFS.
+        """
         directions: Dict[int, Tuple[int, int, str]] = {
             0: (0, -1, 'N'),
             1: (1, 0, 'E'),
@@ -192,6 +214,8 @@ class MazeGenerator:
         return "No path found"
 
     def imperfection_helper(self, maze: n.ndarray) -> bool:
+        """Check whether removing a wall created a 3x3 open area.
+        """
         for y in range(self.height - 2):
             for x in range(self.width - 2):
                 open_check: bool = True
@@ -209,6 +233,8 @@ class MazeGenerator:
         maze: n.ndarray,
         record: bool = False,
     ) -> Union[n.ndarray, Tuple[n.ndarray, List[Dict[str, Any]]]]:
+        """Introduce imperfect mazes by randomly removing walls.
+        """
         actions: Optional[List[Dict[str, Any]]] = [] if record else None
         pattern_coords: Set[Tuple[int, int]] = self.pattern_42()
         directions: List[Tuple[int, int, int, int]] = [
@@ -219,7 +245,7 @@ class MazeGenerator:
         ]
         removed_walls: Set[Tuple[int, int]] = set()
 
-        total_walls: int = int((self.width * self.height) * 0.25)
+        total_walls: int = int((self.width * self.height) * 0.05)
         max_tries: int = self.width * self.height
         walls: int = 0
         tries: int = 0
@@ -262,6 +288,8 @@ class MazeGenerator:
         return maze
 
     def get_maze(self) -> n.ndarray:
+        """Generate and return the maze.
+        """
         result = self.iterative_backtracker()
         assert isinstance(result, n.ndarray)
         self.generated_maze = result
@@ -272,11 +300,15 @@ class MazeGenerator:
         return self.generated_maze
 
     def get_solution_path(self, generated_maze: n.ndarray) -> str:
+        """find the solution path for the maze.
+        """
         self.path = self.bfs(generated_maze)
         return self.path
 
     def get_entry(self) -> Tuple[int, int]:
+        """Return the entry coordinates."""
         return self.entry
 
     def get_exit(self) -> Tuple[int, int]:
+        """Return the exit coordinates."""
         return self.exit
