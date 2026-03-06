@@ -71,7 +71,8 @@ def main():
 
 if __name__ == "__main__":
     try:
-        main()
+        # main()
+        print(n.__version__)
     except KeyboardInterrupt:
        exit(0)
     except Exception as e:
