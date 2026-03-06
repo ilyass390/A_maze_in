@@ -21,10 +21,31 @@ class Render_Maze:
         ]
         self.disco_mode = False
         self.disco_frame = 0
+        self.player_mode = False
+        self.player_pos = None
+        self.player_won = False
     
     def _disco_tick(self):
         self.disco_frame = (self.disco_frame + 1) % len(self.wall_colors)
         curses.init_pair(1, self.wall_colors[self.disco_frame], -1)
+    
+    def _move_player(self, key):
+        if self.player_pos is None:
+            return
+        x, y = self.player_pos
+        move_map = {
+            curses.KEY_UP:    (0, -1, 0),  # (dx, dy, wall_bit)
+            curses.KEY_RIGHT: (1,  0, 1),
+            curses.KEY_DOWN:  (0,  1, 2),
+            curses.KEY_LEFT:  (-1, 0, 3),
+        }
+        if key not in move_map:
+            return
+        dx, dy, wall_bit = move_map[key]
+        if not (self.maze[y, x] & (1 << wall_bit)):  # no wall in that direction
+            self.player_pos = (x + dx, y + dy)
+            if self.player_pos == self.exit:
+                self.player_won = True
 
     def _get_intersection_char(self, up, right, down, left):
         connections = (up, right, down, left)
@@ -72,7 +93,7 @@ class Render_Maze:
         curses.init_pair(2, curses.COLOR_GREEN, curses.COLOR_GREEN)      # entry
         curses.init_pair(3, curses.COLOR_RED,   curses.COLOR_RED)        # exit
         curses.init_pair(4, curses.COLOR_CYAN,  -1)                      # carving head
-        curses.init_pair(5, curses.COLOR_YELLOW, -1)                     # backtrack head
+        curses.init_pair(5, curses.COLOR_YELLOW, curses.COLOR_YELLOW)                     # backtrack head
         curses.init_pair(6, curses.COLOR_CYAN, -1)
         curses.init_pair(7, curses.COLOR_MAGENTA, -1)                    # path
         self._set_wall_color()
@@ -134,9 +155,12 @@ class Render_Maze:
                     char = " "
                 elif is_interior and is_head:
                     char = "▓"
-                    color = curses.color_pair(4) if action_type != 'backtrack' else curses.color_pair(5)
+                    color = curses.color_pair(4)
+                elif is_interior and self.player_pos and (cell_x, cell_y) == self.player_pos and y % 2 != 0 and x % 3 != 0:
+                    char = "◉"
+                    color = curses.color_pair(5)
                 elif is_interior and (cell_x, cell_y) in path_set:
-                    char = "*" if x % 3 == 2 else " "  # center char in left slot, space in right
+                    char = "*" if x % 3 == 1 else " "  # center char in left slot, space in right
                     color = curses.color_pair(7)
                 elif is_wall:
                     color = curses.color_pair(1)
@@ -153,7 +177,6 @@ class Render_Maze:
                 except curses.error:
                     pass
 
-        height, width = maze.shape
         menu_y = 2 * height + 2  # one line below the maze
 
         menu_items = [
@@ -164,6 +187,7 @@ class Render_Maze:
             ("    q", "quit"),
             ("    c", "wall color"),
             ("    d", "disco mode"),
+            ("    m", "play"),
         ]
 
         x_offset = 0
@@ -180,6 +204,16 @@ class Render_Maze:
 
     def animate(self, actions):
         return curses.wrapper(self._animate_main, actions)
+    
+    def _draw_win(self, stdscr):
+        height, width = self.maze.shape
+        msg = "  YOU SOLVED IT!  press r to regenerate or q to quit  "
+        y = height + 3
+        try:
+            stdscr.addstr(y, 0, msg, curses.color_pair(2) | curses.A_BOLD)
+            stdscr.refresh()
+        except curses.error:
+            pass
 
     def _animate_main(self, stdscr, actions):
         curses.curs_set(0)
@@ -297,6 +331,22 @@ class Render_Maze:
                 self._disco_tick()
                 self._draw_frame(stdscr, self.maze, head=None, action_type=None,
                                 path_so_far=path_coords if show_path else None)
+            elif key == ord('m'):
+                self.player_mode = not self.player_mode
+                self.player_won = False
+                if self.player_mode:
+                    self.player_pos = self.entry
+                else:
+                    self.player_pos = None
+                self._draw_frame(stdscr, self.maze, head=None, action_type=None,
+                                path_so_far=path_coords if show_path else None)
+
+            elif key in (curses.KEY_UP, curses.KEY_DOWN, curses.KEY_LEFT, curses.KEY_RIGHT) and self.player_mode:
+                self._move_player(key)
+                self._draw_frame(stdscr, self.maze, head=None, action_type=None,
+                                path_so_far=path_coords if show_path else None)
+                if self.player_won:
+                    self._draw_win(stdscr)
 
     # ── static display ─────────────────────────────────────────────────────────
 
