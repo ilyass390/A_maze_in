@@ -7,6 +7,8 @@ locale.setlocale(locale.LC_ALL, '')
 
 
 class Render_Maze:
+    """Render and animate a maze in
+    the terminal using curses."""
     def __init__(
         self,
         maze: np.ndarray,
@@ -14,6 +16,8 @@ class Render_Maze:
         exit_: Tuple[int, int],
         path: Optional[str] = None,
     ) -> None:
+        """Initialize the renderer with
+        maze data and optional solution path."""
         self.maze: np.ndarray = maze
         self.entry: Tuple[int, int] = entry
         self.exit: Tuple[int, int] = exit_
@@ -36,10 +40,16 @@ class Render_Maze:
         self.player_won: bool = False
 
     def _disco_tick(self) -> None:
+        """Advance disco mode to
+        the next wall color."""
+
         self.disco_frame = (self.disco_frame + 1) % len(self.wall_colors)
         curses.init_pair(1, self.wall_colors[self.disco_frame], -1)
 
     def _move_player(self, key: int) -> None:
+        """Move the player one cell in the
+        direction of the pressed arrow key if no wall blocks it."""
+
         if self.player_pos is None:
             return
         x: int
@@ -69,6 +79,9 @@ class Render_Maze:
         down: int,
         left: int,
     ) -> str:
+        """Return the correct double-line
+        box character for a given set of connections."""
+
         connections: Tuple[int, int, int, int] = (up, right, down, left)
         mapping: Dict[Tuple[int, int, int, int], str] = {
             (1, 1, 1, 1): "╬",
@@ -86,18 +99,27 @@ class Render_Maze:
         return mapping.get(connections, " ")
 
     def _set_wall_color(self) -> None:
+        """Apply the current wall color
+        index to color pair 1."""
+
         curses.init_pair(1, self.wall_colors[self.wall_color_index], -1)
 
     def _get_intersection_chars(self) -> Set[str]:
+
+        """Return the set of all
+        double-line box drawing characters."""
         return set("╬╠╣╦╩║═╔╗╚╝")
 
     def _path_to_coords(self, path_str: str) -> List[Tuple[int, int]]:
+
         direction_map: Dict[str, Tuple[int, int]] = {
             'N': (0, -1),
             'S': (0,  1),
             'E': (1,  0),
             'W': (-1, 0),
         }
+        """Convert a path string of N/S/E/W
+        characters into a list of (x, y) coordinates."""
         x: int
         y: int
         x, y = self.entry
@@ -112,6 +134,9 @@ class Render_Maze:
         return coords
 
     def _init_colors(self) -> None:
+        """Initialize all curses color
+        pairs used by the renderer."""
+
         curses.start_color()
         curses.use_default_colors()
         curses.init_pair(8, 8, 8)
@@ -125,6 +150,9 @@ class Render_Maze:
         self._set_wall_color()
 
     def _build_display(self, maze: np.ndarray) -> List[List[str]]:
+
+        """Build a 2D character grid from the
+        maze bit array, including walls and intersections."""
         height: int
         width: int
         height, width = maze.shape
@@ -175,6 +203,9 @@ class Render_Maze:
         action_type: Optional[str] = None,
         path_sf: Optional[List[Tuple[int, int]]] = None,
     ) -> None:
+        """Draw a single frame of the maze
+        with optional head, path, and player overlays."""
+
         stdscr.clear()
         display: List[List[str]] = self._build_display(maze)
         height: int
@@ -240,7 +271,7 @@ class Render_Maze:
             ("  +/-", "speed"),
             ("space", "skip"),
             ("    p", "path"),
-            ("    r", "new maze"),
+            ("    r", "re-generate new maze (confirm with a button)"),
             ("    q", "quit"),
             ("    c", "wall color"),
             ("    d", "disco mode"),
@@ -267,13 +298,19 @@ class Render_Maze:
     # ── animation ──────────────────
 
     def animate(self, actions: List[Dict[str, Any]]) -> bool:
+        """Start the maze animation, return
+        True to regenerate or False to quit."""
+
         return curses.wrapper(self._animate_main, actions)
 
     def _draw_win(self, stdscr: Any) -> None:
+
+        """Display the win message below the
+        maze when the player reaches the exit."""
         height: int
         height, _ = self.maze.shape
         msg: str = "  YOU SOLVED IT!  press r to regenerate or q to quit  "
-        y: int = height + 3
+        y: int = 2 * height + 3
         try:
             stdscr.addstr(y, 0, msg, curses.color_pair(2) | curses.A_BOLD)
             stdscr.refresh()
@@ -285,6 +322,10 @@ class Render_Maze:
         stdscr: Any,
         actions: List[Dict[str, Any]],
     ) -> bool:
+        """Main animation loop: replay generation actions,
+        animate the path, then enter the
+        interactive hold loop."""
+
         curses.curs_set(0)
         self._init_colors()
 
@@ -388,7 +429,7 @@ class Render_Maze:
                     show_path = False
                     self._draw_frame(stdscr, self.maze)
                 else:
-                    if self._hidden_path and self._hidden_path != "No path found":
+                    if self._hidden_path and self._hidden_path != "No path":
                         path_coords = self._path_to_coords(self._hidden_path)
                         for i in range(len(path_coords)):
                             if self.disco_mode:
@@ -461,6 +502,9 @@ class Render_Maze:
     # ── static display ────────────────────
 
     def _draw(self, stdscr: Any) -> None:
+
+        """Render the final static maze
+        with the solution path."""
         curses.curs_set(0)
         path_coords: Optional[List[Tuple[int, int]]] = (
             self._path_to_coords(self.path)
@@ -470,6 +514,8 @@ class Render_Maze:
         self._draw_frame(stdscr, self.maze, path_sf=path_coords)
 
     def _main(self, stdscr: Any) -> None:
+        """Curses entry point for static display mode."""
+
         curses.curs_set(0)
         if not curses.has_colors():
             raise Exception("Terminal does not support colors")
@@ -478,4 +524,6 @@ class Render_Maze:
         stdscr.getch()
 
     def display(self) -> None:
+        """Display the final maze statically
+        and wait for a keypress."""
         curses.wrapper(self._main)
